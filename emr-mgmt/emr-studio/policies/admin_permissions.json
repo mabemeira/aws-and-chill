@@ -1,0 +1,28 @@
+{
+    "Statement": [
+        {
+            "Action": [
+                "elasticmapreduce:CreateStudio",
+                "elasticmapreduce:DescribeStudio",
+                "elasticmapreduce:DeleteStudio"
+            ],
+            "Effect": "Allow",
+            "Resource": "*"
+        },
+        {
+            "Action": [
+                "elasticmapreduce:ListStudios"
+            ],
+            "Effect": "Allow",
+            "Resource": "*"
+        },
+        {
+            "Action": "iam:PassRole",
+            "Effect": "Allow",
+            "Resource": [
+                "*"
+            ]
+        }
+    ],
+    "Version": "2012-10-17"
+}
