@@ -3,7 +3,7 @@
     "Statement": [
         {
             "Effect": "Allow",
-            "Resource": "arn:aws:elasticmapreduce:<region>:<aws-account-id>:studio/*",
+            "Resource": "arn:aws:elasticmapreduce:${region}:${aws-account-id}:studio/*",
             "Action": [
                 "elasticmapreduce:CreateStudio",
                 "elasticmapreduce:DescribeStudio",
@@ -20,7 +20,7 @@
         {
             "Effect": "Allow",
             "Resource": [
-                "arn:aws:iam::<aws-account-id>:role/<EMRStudio-Service-Role>"
+                "arn:aws:iam::${aws-account-id}:role/${EMRStudio-Service-Role}"
             ],
             "Action": "iam:PassRole"
         }

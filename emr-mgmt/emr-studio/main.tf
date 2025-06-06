@@ -1,10 +1,28 @@
+variable "aws_region" {
+  description = "AWS region"
+  type        = string
+  default     = "us-west-2"
+}
+
 provider "aws" {
-  region = "us-west-2"
+  region = var.aws_region
+}
+
+data "aws_caller_identity" "current" {}
+
+variable "emr_studio_service_role" {
+  description = "EMR Studio Service Role name"
+  type        = string
+  default     = "EMRStudio-Service-Role"
 }
 
 resource "aws_iam_policy" "admin_policy" {
-  name        = "emr-mgmt-emr-studio-admin"
-  policy      = file("policies/admin_permissions.json")
+  name = "emr-mgmt-emr-studio-admin"
+  policy = templatefile("policies/admin_permissions.json", {
+    region             = var.aws_region
+    aws-account-id     = data.aws_caller_identity.current.account_id
+    EMRStudio-Service-Role = var.emr_studio_service_role
+  })
 }
 
 resource "aws_iam_user" "admin_user" {
