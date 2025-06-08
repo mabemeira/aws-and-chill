@@ -14,3 +14,15 @@ variable "emr_studio_bucket" {
   description = "S3 bucket for EMR Studio notebooks"
   type        = string
 }
+
+variable "virtual_cluster_id" {
+  description = "EMR virtual cluster ID for EKS (use '*' for all clusters)"
+  type        = string
+  default     = "*"
+}
+
+variable "emr_on_eks_execution_role" {
+  description = "EMR on EKS execution role name (use '*' for all roles)"
+  type        = string
+  default     = "*"
+}
