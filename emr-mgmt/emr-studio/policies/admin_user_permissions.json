@@ -18,7 +18,7 @@
     {
       "Effect": "Allow",
       "Resource": [
-        "arn:aws:iam::${aws-account-id}:role/${EMRStudio-Service-Role}"
+        "arn:aws:iam::${aws-account-id}:role/${emr-studio-service-role}"
       ],
       "Action": "iam:PassRole"
     }

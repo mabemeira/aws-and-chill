@@ -50,7 +50,7 @@
     {
       "Sid": "AllowPassingServiceRoleForWorkspaceCreation",
       "Action": "iam:PassRole",
-      "Resource": ["arn:aws:iam::*:role/<your-emr-studio-service-role>"],
+      "Resource": ["arn:aws:iam::*:role/${emr-studio-service-role}"],
       "Effect": "Allow"
     },
     {
