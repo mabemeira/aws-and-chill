@@ -64,6 +64,8 @@ emr_on_eks_execution_role = "*"  # or specific role name
 ### 2. Deploy Infrastructure
 
 ```bash
+cd emr-mgmt/emr-studio
+
 terraform init
 terraform plan
 terraform apply
