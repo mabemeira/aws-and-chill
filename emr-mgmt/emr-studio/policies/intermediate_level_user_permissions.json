@@ -136,7 +136,7 @@
       "Effect": "Allow",
       "Condition": {
         "StringEquals": {
-          "elasticmapreduce:ResourceTag/creatorUserId": "${aws:userId}"
+          "elasticmapreduce:ResourceTag/creatorUserId": "$${aws:userId}"
         }
       }
     },
