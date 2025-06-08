@@ -1,0 +1,275 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "AllowEMRBasicActions",
+      "Action": [
+        "elasticmapreduce:CreateEditor",
+        "elasticmapreduce:DescribeEditor",
+        "elasticmapreduce:ListEditors",
+        "elasticmapreduce:StartEditor",
+        "elasticmapreduce:StopEditor",
+        "elasticmapreduce:DeleteEditor",
+        "elasticmapreduce:OpenEditorInConsole",
+        "elasticmapreduce:AttachEditor",
+        "elasticmapreduce:DetachEditor",
+        "elasticmapreduce:CreateRepository",
+        "elasticmapreduce:DescribeRepository",
+        "elasticmapreduce:DeleteRepository",
+        "elasticmapreduce:ListRepositories",
+        "elasticmapreduce:LinkRepository",
+        "elasticmapreduce:UnlinkRepository",
+        "elasticmapreduce:DescribeCluster",
+        "elasticmapreduce:ListInstanceGroups",
+        "elasticmapreduce:ListBootstrapActions",
+        "elasticmapreduce:ListClusters",
+        "elasticmapreduce:ListSteps",
+        "elasticmapreduce:CreatePersistentAppUI",
+        "elasticmapreduce:DescribePersistentAppUI",
+        "elasticmapreduce:GetPersistentAppUIPresignedURL",
+        "elasticmapreduce:GetOnClusterAppUIPresignedURL"
+      ],
+      "Resource": "*",
+      "Effect": "Allow"
+    },
+    {
+      "Sid": "AllowEMRContainersBasicActions",
+      "Action": [
+        "emr-containers:DescribeVirtualCluster",
+        "emr-containers:ListVirtualClusters",
+        "emr-containers:DescribeManagedEndpoint",
+        "emr-containers:ListManagedEndpoints",
+        "emr-containers:DescribeJobRun",
+        "emr-containers:ListJobRuns"
+      ],
+      "Resource": "*",
+      "Effect": "Allow"
+    },
+    {
+      "Sid": "AllowRetrievingManagedEndpointCredentials",
+      "Effect": "Allow",
+      "Action": ["emr-containers:GetManagedEndpointSessionCredentials"],
+      "Resource": [
+        "arn:aws:emr-containers:${region}:${aws-account-id}:/virtualclusters/<virtual-cluster-id>/endpoints/<managed-endpoint-id>"
+      ],
+      "Condition": {
+        "StringEquals": {
+          "emr-containers:ExecutionRoleArn": [
+            "arn:aws:iam::${aws-account-id}:role/<emr-on-eks-execution-role>"
+          ]
+        }
+      }
+    },
+    {
+      "Sid": "AllowSecretManagerListSecrets",
+      "Action": ["secretsmanager:ListSecrets"],
+      "Resource": "*",
+      "Effect": "Allow"
+    },
+    {
+      "Sid": "AllowSecretCreationWithEMRTagsAndEMRStudioPrefix",
+      "Effect": "Allow",
+      "Action": "secretsmanager:CreateSecret",
+      "Resource": "arn:aws:secretsmanager:*:*:secret:emr-studio-*",
+      "Condition": {
+        "StringEquals": {
+          "aws:RequestTag/for-use-with-amazon-emr-managed-policies": "true"
+        }
+      }
+    },
+    {
+      "Sid": "AllowAddingTagsOnSecretsWithEMRStudioPrefix",
+      "Effect": "Allow",
+      "Action": "secretsmanager:TagResource",
+      "Resource": "arn:aws:secretsmanager:*:*:secret:emr-studio-*"
+    },
+    {
+      "Sid": "AllowClusterTemplateRelatedIntermediateActions",
+      "Action": [
+        "servicecatalog:DescribeProduct",
+        "servicecatalog:DescribeProductView",
+        "servicecatalog:DescribeProvisioningParameters",
+        "servicecatalog:ProvisionProduct",
+        "servicecatalog:SearchProducts",
+        "servicecatalog:UpdateProvisionedProduct",
+        "servicecatalog:ListProvisioningArtifacts",
+        "servicecatalog:ListLaunchPaths",
+        "servicecatalog:DescribeRecord",
+        "cloudformation:DescribeStackResources"
+      ],
+      "Resource": "*",
+      "Effect": "Allow"
+    },
+    {
+      "Sid": "AllowEMRCreateClusterAdvancedActions",
+      "Action": ["elasticmapreduce:RunJobFlow"],
+      "Resource": "*",
+      "Effect": "Allow"
+    },
+    {
+      "Sid": "AllowPassingServiceRoleForWorkspaceCreation",
+      "Action": "iam:PassRole",
+      "Resource": [
+        "arn:aws:iam::*:role/<your-emr-studio-service-role>",
+        "arn:aws:iam::*:role/EMR_DefaultRole_V2",
+        "arn:aws:iam::*:role/EMR_EC2_DefaultRole"
+      ],
+      "Effect": "Allow"
+    },
+    {
+      "Sid": "AllowS3ListAndLocationPermissions",
+      "Action": [
+        "s3:ListAllMyBuckets",
+        "s3:ListBucket",
+        "s3:GetBucketLocation"
+      ],
+      "Resource": "arn:aws:s3:::*",
+      "Effect": "Allow"
+    },
+    {
+      "Sid": "AllowS3ReadOnlyAccessToLogs",
+      "Action": ["s3:GetObject"],
+      "Resource": [
+        "arn:aws:s3:::aws-logs-${aws-account-id}-${region}/elasticmapreduce/*"
+      ],
+      "Effect": "Allow"
+    },
+    {
+      "Sid": "AllowConfigurationForWorkspaceCollaboration",
+      "Action": [
+        "elasticmapreduce:UpdateEditor",
+        "elasticmapreduce:PutWorkspaceAccess",
+        "elasticmapreduce:DeleteWorkspaceAccess",
+        "elasticmapreduce:ListWorkspaceAccessIdentities"
+      ],
+      "Resource": "*",
+      "Effect": "Allow",
+      "Condition": {
+        "StringEquals": {
+          "elasticmapreduce:ResourceTag/creatorUserId": "${aws:userId}"
+        }
+      }
+    },
+    {
+      "Sid": "SageMakerDataWranglerForEMRStudio",
+      "Effect": "Allow",
+      "Action": [
+        "sagemaker:CreatePresignedDomainUrl",
+        "sagemaker:DescribeDomain",
+        "sagemaker:ListDomains",
+        "sagemaker:ListUserProfiles"
+      ],
+      "Resource": "*"
+    },
+    {
+      "Sid": "DescribeNetwork",
+      "Effect": "Allow",
+      "Action": [
+        "ec2:DescribeVpcs",
+        "ec2:DescribeSubnets",
+        "ec2:DescribeSecurityGroups"
+      ],
+      "Resource": "*"
+    },
+    {
+      "Sid": "ListIAMRoles",
+      "Effect": "Allow",
+      "Action": ["iam:ListRoles"],
+      "Resource": "*"
+    },
+    {
+      "Sid": "AllowServerlessActions",
+      "Action": [
+        "emr-serverless:CreateApplication",
+        "emr-serverless:UpdateApplication",
+        "emr-serverless:DeleteApplication",
+        "emr-serverless:ListApplications",
+        "emr-serverless:GetApplication",
+        "emr-serverless:StartApplication",
+        "emr-serverless:StopApplication",
+        "emr-serverless:StartJobRun",
+        "emr-serverless:CancelJobRun",
+        "emr-serverless:ListJobRuns",
+        "emr-serverless:GetJobRun",
+        "emr-serverless:GetDashboardForJobRun",
+        "emr-serverless:AccessInteractiveEndpoints"
+      ],
+      "Resource": "*",
+      "Effect": "Allow"
+    },
+    {
+      "Sid": "AllowPassingRuntimeRoleForRunningServerlessJob",
+      "Action": "iam:PassRole",
+      "Resource": "arn:aws:iam::*:role/serverless-runtime-role",
+      "Effect": "Allow"
+    },
+    {
+      "Sid": "AllowCodeWhisperer",
+      "Effect": "Allow",
+      "Action": ["codewhisperer:GenerateRecommendations"],
+      "Resource": "*"
+    },
+    {
+      "Sid": "AllowAthenaSQL",
+      "Action": [
+        "athena:StartQueryExecution",
+        "athena:StopQueryExecution",
+        "athena:GetQueryExecution",
+        "athena:GetQueryRuntimeStatistics",
+        "athena:GetQueryResults",
+        "athena:ListQueryExecutions",
+        "athena:BatchGetQueryExecution",
+        "athena:GetNamedQuery",
+        "athena:ListNamedQueries",
+        "athena:BatchGetNamedQuery",
+        "athena:UpdateNamedQuery",
+        "athena:DeleteNamedQuery",
+        "athena:ListDataCatalogs",
+        "athena:GetDataCatalog",
+        "athena:ListDatabases",
+        "athena:GetDatabase",
+        "athena:ListTableMetadata",
+        "athena:GetTableMetadata",
+        "athena:ListWorkGroups",
+        "athena:GetWorkGroup",
+        "athena:CreateNamedQuery",
+        "athena:GetPreparedStatement",
+        "glue:CreateDatabase",
+        "glue:DeleteDatabase",
+        "glue:GetDatabase",
+        "glue:GetDatabases",
+        "glue:UpdateDatabase",
+        "glue:CreateTable",
+        "glue:DeleteTable",
+        "glue:BatchDeleteTable",
+        "glue:UpdateTable",
+        "glue:GetTable",
+        "glue:GetTables",
+        "glue:BatchCreatePartition",
+        "glue:CreatePartition",
+        "glue:DeletePartition",
+        "glue:BatchDeletePartition",
+        "glue:UpdatePartition",
+        "glue:GetPartition",
+        "glue:GetPartitions",
+        "glue:BatchGetPartition",
+        "kms:ListAliases",
+        "kms:ListKeys",
+        "kms:DescribeKey",
+        "lakeformation:GetDataAccess",
+        "s3:GetBucketLocation",
+        "s3:GetBucketLocation",
+        "s3:GetObject",
+        "s3:ListBucket",
+        "s3:ListBucketMultipartUploads",
+        "s3:ListMultipartUploadParts",
+        "s3:AbortMultipartUpload",
+        "s3:PutObject",
+        "s3:PutBucketPublicAccessBlock",
+        "s3:ListAllMyBuckets"
+      ],
+      "Resource": "*",
+      "Effect": "Allow"
+    }
+  ]
+}
