@@ -1,60 +1,99 @@
-variable "aws_region" {
-  description = "AWS region"
-  type        = string
-  default     = "us-west-2"
-}
-
 provider "aws" {
   region = var.aws_region
 }
 
 data "aws_caller_identity" "current" {}
 
-variable "emr_studio_service_role" {
-  description = "EMR Studio Service Role name"
-  type        = string
-  default     = "EMRStudio-Service-Role"
+# Admin User
+module "admin_user" {
+  source = "./modules/iam-user"
+  
+  user_level                 = "admin"
+  aws_region                 = var.aws_region
+  aws_account_id             = data.aws_caller_identity.current.account_id
+  emr_studio_service_role    = var.emr_studio_service_role
+  virtual_cluster_id         = var.virtual_cluster_id
+  emr_on_eks_execution_role  = var.emr_on_eks_execution_role
 }
 
-variable "emr_studio_bucket" {
-  description = "S3 bucket for EMR Studio notebooks"
-  type        = string
+# EMR Studio Service Role
+module "emr_studio_service_role" {
+  source = "./modules/emr-service-role"
+  
+  service_role_name  = var.emr_studio_service_role
+  aws_region         = var.aws_region
+  aws_account_id     = data.aws_caller_identity.current.account_id
+  emr_studio_bucket  = var.emr_studio_bucket
 }
 
-resource "aws_iam_policy" "admin_user_policy" {
-  name = "emr-mgmt-emr-studio-admin-user"
-  policy = templatefile("policies/admin_user_permissions.json", {
-    region             = var.aws_region
-    aws-account-id     = data.aws_caller_identity.current.account_id
-    EMRStudio-Service-Role = var.emr_studio_service_role
-  })
+# Basic User
+module "basic_user" {
+  source = "./modules/iam-user"
+  
+  user_level                 = "basic"
+  aws_region                 = var.aws_region
+  aws_account_id             = data.aws_caller_identity.current.account_id
+  emr_studio_service_role    = var.emr_studio_service_role
+  virtual_cluster_id         = var.virtual_cluster_id
+  emr_on_eks_execution_role  = var.emr_on_eks_execution_role
 }
 
-resource "aws_iam_user" "admin_user" {
-  name = "emr-mgmt-emr-studio-admin-user"
+# Intermediate User
+module "intermediate_user" {
+  source = "./modules/iam-user"
+  
+  user_level                 = "intermediate"
+  aws_region                 = var.aws_region
+  aws_account_id             = data.aws_caller_identity.current.account_id
+  emr_studio_service_role    = var.emr_studio_service_role
+  virtual_cluster_id         = var.virtual_cluster_id
+  emr_on_eks_execution_role  = var.emr_on_eks_execution_role
 }
 
-resource "aws_iam_user_policy_attachment" "emr_mgmt_emr_studio_admin_user_attach_policy" {
-  user       = aws_iam_user.admin_user.name
-  policy_arn = aws_iam_policy.admin_user_policy.arn
+# Advanced User
+module "advanced_user" {
+  source = "./modules/iam-user"
+  
+  user_level                 = "advanced"
+  aws_region                 = var.aws_region
+  aws_account_id             = data.aws_caller_identity.current.account_id
+  emr_studio_service_role    = var.emr_studio_service_role
+  virtual_cluster_id         = var.virtual_cluster_id
+  emr_on_eks_execution_role  = var.emr_on_eks_execution_role
 }
 
-resource "aws_iam_role" "emr_studio_service_role" {
-  name = var.emr_studio_service_role
-  assume_role_policy = templatefile("policies/service_role_trust_policy.json", {
-    region         = var.aws_region
-    aws-account-id = data.aws_caller_identity.current.account_id
-  })
+# Outputs
+output "emr_studio_service_role" {
+  description = "EMR Studio service role details"
+  value = {
+    name       = module.emr_studio_service_role.role_name
+    arn        = module.emr_studio_service_role.role_arn
+    policy_arn = module.emr_studio_service_role.policy_arn
+  }
 }
 
-resource "aws_iam_policy" "emr_studio_service_role_policy" {
-  name = "emr-studio-service-role-permissions"
-  policy = templatefile("policies/service_role_permissions.json", {
-    bucket-name = var.emr_studio_bucket
-  })
-}
-
-resource "aws_iam_role_policy_attachment" "emr_studio_service_role_attach_policy" {
-  role       = aws_iam_role.emr_studio_service_role.name
-  policy_arn = aws_iam_policy.emr_studio_service_role_policy.arn
+output "iam_users" {
+  description = "IAM users created for different access levels"
+  value = {
+    admin = {
+      name       = module.admin_user.user_name
+      arn        = module.admin_user.user_arn
+      policy_arn = module.admin_user.policy_arn
+    }
+    basic = {
+      name       = module.basic_user.user_name
+      arn        = module.basic_user.user_arn
+      policy_arn = module.basic_user.policy_arn
+    }
+    intermediate = {
+      name       = module.intermediate_user.user_name
+      arn        = module.intermediate_user.user_arn
+      policy_arn = module.intermediate_user.policy_arn
+    }
+    advanced = {
+      name       = module.advanced_user.user_name
+      arn        = module.advanced_user.user_arn
+      policy_arn = module.advanced_user.policy_arn
+    }
+  }
 }
