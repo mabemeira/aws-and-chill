@@ -50,12 +50,12 @@
       "Effect": "Allow",
       "Action": ["emr-containers:GetManagedEndpointSessionCredentials"],
       "Resource": [
-        "arn:aws:emr-containers:${region}:${aws-account-id}:/virtualclusters/<virtual-cluster-id>/endpoints/<managed-endpoint-id>"
+        "arn:aws:emr-containers:${region}:${aws-account-id}:/virtualclusters/${virtual-cluster-id}/endpoints/*"
       ],
       "Condition": {
         "StringEquals": {
           "emr-containers:ExecutionRoleArn": [
-            "arn:aws:iam::${aws-account-id}:role/<emr-on-eks-execution-role>"
+            "arn:aws:iam::${aws-account-id}:role/${emr-on-eks-execution-role}"
           ]
         }
       }
