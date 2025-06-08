@@ -10,9 +10,9 @@ RUN wget https://releases.hashicorp.com/terraform/${TERRAFORM_VERSION}/terraform
     mv terraform /usr/local/bin/ && \
     rm terraform_${TERRAFORM_VERSION}_linux_amd64.zip
 
-RUN mkdir -p /emr-mgmt/emr-studio
-VOLUME /emr-mgmt/emr-studio
-WORKDIR /emr-mgmt/emr-studio
+RUN mkdir -p /workspace
+VOLUME /workspace
+WORKDIR /workspace
 
 RUN mkdir Downloads && \
     cd Downloads && \
