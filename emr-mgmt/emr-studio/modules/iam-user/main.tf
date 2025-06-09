@@ -61,7 +61,6 @@ resource "aws_iam_policy" "user_policy" {
   tags = {
     Name    = "emr-mgmt-emr-studio-${var.user_level}-user-policy"
     Project = "aws-and-chill"
-    UserLevel = var.user_level
   }
 }
 
@@ -71,7 +70,6 @@ resource "aws_iam_user" "user" {
   tags = {
     Name    = "emr-mgmt-emr-studio-${var.user_level}-user"
     Project = "aws-and-chill"
-    UserLevel = var.user_level
   }
 }
 
