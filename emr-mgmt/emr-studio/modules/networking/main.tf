@@ -68,29 +68,29 @@ resource "aws_security_group" "emr_studio_engine" {
 
   # Allow Jupyter/Zeppelin notebook communication
   ingress {
-    from_port                = 18888
-    to_port                  = 18888
-    protocol                 = "tcp"
-    source_security_group_id = aws_security_group.emr_studio_workspace.id
-    description              = "Jupyter notebook communication"
+    from_port       = 18888
+    to_port         = 18888
+    protocol        = "tcp"
+    security_groups = [aws_security_group.emr_studio_workspace.id]
+    description     = "Jupyter notebook communication"
   }
 
   # Allow Livy server communication
   ingress {
-    from_port                = 8998
-    to_port                  = 8998
-    protocol                 = "tcp"
-    source_security_group_id = aws_security_group.emr_studio_workspace.id
-    description              = "Livy server communication"
+    from_port       = 8998
+    to_port         = 8998
+    protocol        = "tcp"
+    security_groups = [aws_security_group.emr_studio_workspace.id]
+    description     = "Livy server communication"
   }
 
   # Allow Spark History Server
   ingress {
-    from_port                = 18080
-    to_port                  = 18080
-    protocol                 = "tcp"
-    source_security_group_id = aws_security_group.emr_studio_workspace.id
-    description              = "Spark History Server"
+    from_port       = 18080
+    to_port         = 18080
+    protocol        = "tcp"
+    security_groups = [aws_security_group.emr_studio_workspace.id]
+    description     = "Spark History Server"
   }
 
   # Allow communication within the same security group
