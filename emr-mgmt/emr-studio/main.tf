@@ -62,38 +62,31 @@ module "advanced_user" {
   emr_on_eks_execution_role  = var.emr_on_eks_execution_role
 }
 
-# Outputs
-output "emr_studio_service_role" {
-  description = "EMR Studio service role details"
-  value = {
-    name       = module.emr_studio_service_role.role_name
-    arn        = module.emr_studio_service_role.role_arn
-    policy_arn = module.emr_studio_service_role.policy_arn
-  }
+# Networking Module
+module "networking" {
+  source = "./modules/networking"
+  
+  vpc_id            = var.vpc_id
+  subnet_ids        = var.subnet_ids
+  emr_studio_name   = var.emr_studio_name
 }
 
-output "iam_users" {
-  description = "IAM users created for different access levels"
-  value = {
-    admin = {
-      name       = module.admin_user.user_name
-      arn        = module.admin_user.user_arn
-      policy_arn = module.admin_user.policy_arn
-    }
-    basic = {
-      name       = module.basic_user.user_name
-      arn        = module.basic_user.user_arn
-      policy_arn = module.basic_user.policy_arn
-    }
-    intermediate = {
-      name       = module.intermediate_user.user_name
-      arn        = module.intermediate_user.user_arn
-      policy_arn = module.intermediate_user.policy_arn
-    }
-    advanced = {
-      name       = module.advanced_user.user_name
-      arn        = module.advanced_user.user_arn
-      policy_arn = module.advanced_user.policy_arn
-    }
-  }
+# EMR Studio Module
+module "emr_studio" {
+  source = "./modules/emr-studio"
+  
+  emr_studio_name             = var.emr_studio_name
+  auth_mode                   = "IAM"
+  vpc_id                      = module.networking.vpc_id
+  subnet_ids                  = module.networking.subnet_ids
+  service_role_arn            = module.emr_studio_service_role.role_arn
+  user_role_arn               = module.admin_user.user_arn
+  workspace_security_group_id = module.networking.workspace_security_group_id
+  engine_security_group_id    = module.networking.engine_security_group_id
+  default_s3_location         = var.default_s3_location
+  
+  depends_on = [
+    module.emr_studio_service_role,
+    module.networking
+  ]
 }
