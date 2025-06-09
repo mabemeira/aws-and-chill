@@ -1,6 +1,11 @@
 variable "user_level" {
   description = "The level of the user (admin, basic, intermediate, advanced)"
   type        = string
+  
+  validation {
+    condition     = contains(["admin", "basic", "intermediate", "advanced"], var.user_level)
+    error_message = "User level must be one of: admin, basic, intermediate, advanced."
+  }
 }
 
 variable "aws_region" {
@@ -52,10 +57,22 @@ resource "aws_iam_policy" "user_policy" {
       emr-on-eks-execution-role = var.emr_on_eks_execution_role
     } : {}
   ))
+
+  tags = {
+    Name    = "emr-mgmt-emr-studio-${var.user_level}-user-policy"
+    Project = "aws-and-chill"
+    UserLevel = var.user_level
+  }
 }
 
 resource "aws_iam_user" "user" {
   name = "emr-mgmt-emr-studio-${var.user_level}-user"
+
+  tags = {
+    Name    = "emr-mgmt-emr-studio-${var.user_level}-user"
+    Project = "aws-and-chill"
+    UserLevel = var.user_level
+  }
 }
 
 resource "aws_iam_user_policy_attachment" "user_attach_policy" {
