@@ -80,7 +80,6 @@ module "emr_studio" {
   vpc_id                      = module.networking.vpc_id
   subnet_ids                  = module.networking.subnet_ids
   service_role_arn            = module.emr_studio_service_role.role_arn
-  user_role_arn               = module.admin_user.user_arn
   workspace_security_group_id = module.networking.workspace_security_group_id
   engine_security_group_id    = module.networking.engine_security_group_id
   default_s3_location         = var.default_s3_location

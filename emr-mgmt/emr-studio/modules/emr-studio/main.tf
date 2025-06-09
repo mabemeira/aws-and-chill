@@ -29,10 +29,6 @@ variable "service_role_arn" {
   type        = string
 }
 
-variable "user_role_arn" {
-  description = "ARN of the user role for EMR Studio"
-  type        = string
-}
 
 variable "workspace_security_group_id" {
   description = "Security group ID for EMR Studio workspace"
@@ -63,7 +59,6 @@ resource "aws_emr_studio" "main" {
   vpc_id                      = var.vpc_id
   subnet_ids                  = var.subnet_ids
   service_role                = var.service_role_arn
-  user_role                   = var.user_role_arn
   workspace_security_group_id = var.workspace_security_group_id
   engine_security_group_id    = var.engine_security_group_id
   default_s3_location         = var.default_s3_location

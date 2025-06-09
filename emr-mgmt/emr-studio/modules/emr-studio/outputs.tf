@@ -23,10 +23,6 @@ output "service_role" {
   value       = aws_emr_studio.main.service_role
 }
 
-output "user_role" {
-  description = "EMR Studio user role ARN"
-  value       = aws_emr_studio.main.user_role
-}
 
 output "emr_studio_details" {
   description = "Complete EMR Studio details"
@@ -36,6 +32,5 @@ output "emr_studio_details" {
     arn          = aws_emr_studio.main.arn
     url          = aws_emr_studio.main.url
     service_role = aws_emr_studio.main.service_role
-    user_role    = aws_emr_studio.main.user_role
   }
 }
