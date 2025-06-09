@@ -38,7 +38,99 @@ This module creates:
    - **Basic**: Read-only and basic notebook operations
    - **Intermediate**: Cluster creation using templates
    - **Advanced**: Full cluster creation and configuration permissions
-3.
+3. **Networking Infrastructure**: Security groups and VPC validation for EMR Studio connectivity
+4. **EMR Studio Instance**: The main studio resource with IAM authentication
+
+### Module Architecture
+
+```
+emr-mgmt/emr-studio/
+├── main.tf                    # Root module configuration
+├── variables.tf               # Input variables
+├── README.md                  # This documentation
+├── modules/
+│   ├── emr-service-role/      # EMR Studio service role
+│   │   ├── main.tf
+│   │   └── outputs.tf
+│   ├── iam-user/              # Reusable IAM user module
+│   │   ├── main.tf
+│   │   └── outputs.tf
+│   ├── networking/            # Security groups and VPC validation
+│   │   ├── main.tf
+│   │   └── outputs.tf
+│   └── emr-studio/            # EMR Studio resource
+│       ├── main.tf
+│       └── outputs.tf
+└── policies/                  # JSON policy files
+    ├── service_role_trust_policy.json
+    ├── service_role_permissions.json
+    ├── admin_user_permissions.json
+    ├── basic_level_user_permissions.json
+    ├── intermediate_level_user_permissions.json
+    └── advanced_level_user_permissions.json
+```
+
+### Module Dependencies
+
+The modules have the following dependency relationships:
+
+1. **emr-service-role** → Independent (creates IAM role and policy)
+2. **iam-user** → Independent (creates users for each access level)
+3. **networking** → Independent (validates VPC and creates security groups)
+4. **emr-studio** → Depends on: emr-service-role, networking
+
+### Resource Creation Flow
+
+```mermaid
+graph TD
+    A[emr-service-role] --> D[emr-studio]
+    B[networking] --> D
+    C[iam-user × 4] 
+    D --> E[EMR Studio Ready]
+    
+    A1[IAM Role] --> A
+    A2[IAM Policy] --> A
+    A3[Policy Attachment] --> A
+    
+    B1[Security Group - Workspace] --> B
+    B2[Security Group - Engine] --> B
+    B3[VPC Validation] --> B
+    
+    C1[Admin User] --> C
+    C2[Basic User] --> C
+    C3[Intermediate User] --> C
+    C4[Advanced User] --> C
+```
+
+### Reusable Components
+
+**iam-user Module**: 
+- Used 4 times with different `user_level` parameters
+- Dynamically selects appropriate policy file based on user level
+- Applies conditional variables for intermediate/advanced users
+
+**Policy Template System**:
+- JSON policy files with variable substitution
+- Templatefile function for dynamic policy generation
+- Consistent parameter naming across all policies
+
+### Resource Naming Convention
+
+All resources follow a consistent naming pattern:
+
+- **IAM Resources**: `emr-mgmt-emr-studio-{component}-{identifier}`
+- **Security Groups**: `{studio_name}-{purpose}-sg`
+- **EMR Studio**: `{studio_name}` (configurable)
+
+### Tagging Strategy
+
+**Standard Tags Applied to All Resources**:
+- `Name`: Resource-specific identifier
+- `Project`: "aws-and-chill"
+
+**Flexible Tagging**:
+- EMR Studio module accepts additional tags via `tags` variable
+- Tags are merged with standard tags using Terraform's `merge()` function
 
 ## Prerequisites
 
@@ -119,6 +211,102 @@ terraform output
 - **Permissions**: Full EMR Studio management including user management and studio configuration
 - **Policy File**: `policies/admin_user_permissions.json`
 
+## Networking
+
+### VPC and Security Group Configuration
+
+The networking module creates the required security groups and validates the VPC configuration for EMR Studio connectivity.
+
+#### Security Groups
+
+**EMR Studio Workspace Security Group**:
+- **Purpose**: Controls access to the EMR Studio workspace interface
+- **Ingress Rules**:
+  - Port 443 (HTTPS): Access to EMR Studio UI from anywhere (0.0.0.0/0)
+- **Egress Rules**: All outbound traffic allowed
+- **Resource Name**: `${emr_studio_name}-workspace-sg`
+
+**EMR Studio Engine Security Group**:
+- **Purpose**: Enables communication between EMR Studio and EMR clusters
+- **Ingress Rules**:
+  - Port 18888: Jupyter notebook communication from workspace security group
+  - Port 8998: Livy server communication from workspace security group  
+  - Port 18080: Spark History Server access from workspace security group
+  - Ports 0-65535: Internal communication within the same security group
+- **Egress Rules**: All outbound traffic allowed
+- **Resource Name**: `${emr_studio_name}-engine-sg`
+
+#### Network Requirements
+
+**VPC Configuration**:
+- Must have existing VPC with valid ID
+- Subnets must be in the same VPC
+- At least one subnet required (validated)
+- Subnets should have internet access for EMR Studio functionality
+
+**Data Sources**:
+- `aws_vpc.selected`: Validates the specified VPC exists
+- `aws_subnets.selected`: Validates subnets exist and belong to the VPC
+
+### Network Architecture
+
+```
+Internet Gateway
+       |
+   VPC (existing)
+       |
+   Subnets (existing)
+       |
++------------------+     +-------------------+
+| Workspace SG     |     | Engine SG         |
+| Port 443 (HTTPS) | --> | Ports 18888,8998, |
+| From: 0.0.0.0/0  |     | 18080 + Internal  |
++------------------+     +-------------------+
+       |                         |
+   EMR Studio              EMR Clusters
+   Workspace              (Future deployment)
+```
+
+## Create EMR Studio
+
+### EMR Studio Resource Configuration
+
+The EMR Studio module creates the main studio resource with the following configuration:
+
+#### Core Configuration
+
+**Authentication Mode**: 
+- Set to "IAM" for identity-based access control
+- Users authenticate using AWS IAM credentials
+
+**Network Settings**:
+- **VPC**: Uses the VPC ID from the networking module
+- **Subnets**: Uses subnet IDs validated by the networking module
+- **Security Groups**: 
+  - Workspace Security Group: Controls Studio UI access
+  - Engine Security Group: Manages cluster communication
+
+**Service Integration**:
+- **Service Role**: ARN from the EMR Studio service role module
+- **S3 Location**: Default location for storing notebooks and outputs
+
+#### Dependencies
+
+The EMR Studio resource depends on:
+1. **EMR Studio Service Role**: Must be created first to provide necessary permissions
+2. **Networking Module**: Security groups and VPC validation must complete first
+
+
+#### Studio Properties
+
+**Studio Name**: Configurable via `emr_studio_name` variable (default: "aws-and-chill-emr-studio")
+
+**Tags Applied**:
+- `Name`: Studio name for identification
+- `Project`: "aws-and-chill" for resource grouping
+- Additional tags can be merged via the `tags` variable
+
+
 ## Security Best Practices
 
 1. **Principle of Least Privilege**: Each user type has only the minimum permissions required
@@ -133,6 +321,11 @@ The module provides the following outputs:
 - **EMR Studio Service Role**: Name, ARN, and policy ARN
 - **IAM Users**: Details for all created users (admin, basic, intermediate, advanced)
 - ...
+
+## Tags Applied:
+- `Name`: Studio name for identification
+- `Project`: "aws-and-chill" for resource grouping
+- Additional tags can be merged via the `tags` variable
 
 ## References
 
