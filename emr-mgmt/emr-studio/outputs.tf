@@ -47,3 +47,24 @@ output "iam_users" {
     }
   }
 }
+
+# Service Catalog Outputs
+output "service_catalog_portfolio_id" {
+  description = "Service Catalog Portfolio ID"
+  value       = module.service_catalog.portfolio_id
+}
+
+output "service_catalog_portfolio_arn" {
+  description = "Service Catalog Portfolio ARN"
+  value       = module.service_catalog.portfolio_arn
+}
+
+output "service_catalog_product_id" {
+  description = "Service Catalog Product ID"
+  value       = module.service_catalog.product_id
+}
+
+output "emr_template_s3_url" {
+  description = "S3 URL of the EMR CloudFormation template"
+  value       = module.service_catalog.template_s3_url
+}

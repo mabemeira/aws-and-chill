@@ -89,3 +89,21 @@ module "emr_studio" {
     module.networking
   ]
 }
+
+# Service Catalog Module
+module "service_catalog" {
+  source = "./modules/service-catalog"
+  
+  portfolio_name       = var.service_catalog_portfolio_name
+  portfolio_description = var.service_catalog_portfolio_description
+  product_name         = var.service_catalog_product_name
+  template_file_path   = "${path.module}/cloud-formation-templates/example-two-node-cluster.yaml"
+  template_url         = "https://${var.emr_studio_bucket}.s3.amazonaws.com/service-catalog-templates/example-two-node-cluster.yaml"
+  s3_bucket           = var.emr_studio_bucket
+  
+  tags = {
+    Environment = "production"
+    Project     = "aws-and-chill"
+    Component   = "emr-studio"
+  }
+}

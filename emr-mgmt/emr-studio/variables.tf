@@ -53,3 +53,22 @@ variable "default_s3_location" {
   description = "Default S3 location for EMR Studio"
   type        = string
 }
+
+# Service Catalog Variables
+variable "service_catalog_portfolio_name" {
+  description = "Name of the Service Catalog portfolio"
+  type        = string
+  default     = "EMR Cluster Templates"
+}
+
+variable "service_catalog_portfolio_description" {
+  description = "Description of the Service Catalog portfolio"
+  type        = string
+  default     = "Portfolio containing EMR cluster templates for self-service provisioning"
+}
+
+variable "service_catalog_product_name" {
+  description = "Name of the Service Catalog product"
+  type        = string
+  default     = "EMR Two Node Cluster"
+}
