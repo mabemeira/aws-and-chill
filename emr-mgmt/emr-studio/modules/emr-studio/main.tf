@@ -69,6 +69,7 @@ resource "aws_emr_studio" "main" {
     {
       Name    = var.emr_studio_name
       Project = "aws-and-chill"
+      Team = "Data Analytics"
     }
   )
 }

@@ -143,6 +143,17 @@
       ],
       "Resource": "*",
       "Effect": "Allow"
+    },
+    {
+      "Sid": "AllowCreateStudioPresignedUrl",
+      "Effect": "Allow",
+      "Action": ["elasticmapreduce:CreateStudioPresignedUrl"],
+      "Resource": "arn:aws:elasticmapreduce:${region}:${aws-account-id}:studio/*",
+      "Condition": {
+        "StringEquals": {
+          "elasticmapreduce:ResourceTag/Team": "Data Analytics"
+        }
+      }
     }
   ]
 }
