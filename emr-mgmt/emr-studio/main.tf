@@ -100,6 +100,10 @@ module "service_catalog" {
   template_file_path   = "${path.module}/cloud-formation-templates/example-two-node-cluster.yaml"
   s3_location_cloud_formation_templates = var.s3_location_cloud_formation_templates
   
+  # Grant portfolio access to users
+  advanced_user_arn    = module.advanced_user.user_arn
+  intermediate_user_arn = module.intermediate_user.user_arn
+  
   tags = {
     Environment = "production"
     Project     = "aws-and-chill"
