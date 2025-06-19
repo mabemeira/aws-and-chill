@@ -12,6 +12,7 @@
         "elasticmapreduce:*PersistentAppUI*",
         "elasticmapreduce:GetOnClusterAppUIPresignedURL",
         "elasticmapreduce:RunJobFlow",
+        "elasticmapreduce:TerminateJobFlows",
         "elasticmapreduce:UpdateEditor",
         "elasticmapreduce:*WorkspaceAccess*"
       ],
