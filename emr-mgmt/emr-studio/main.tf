@@ -82,7 +82,7 @@ module "emr_studio" {
   service_role_arn            = module.emr_studio_service_role.role_arn
   workspace_security_group_id = module.networking.workspace_security_group_id
   engine_security_group_id    = module.networking.engine_security_group_id
-  default_s3_location         = var.default_s3_location
+  s3_location_emr_studio_notebooks = var.s3_location_emr_studio_notebooks
   
   depends_on = [
     module.emr_studio_service_role,
@@ -98,8 +98,7 @@ module "service_catalog" {
   portfolio_description = var.service_catalog_portfolio_description
   product_name         = var.service_catalog_product_name
   template_file_path   = "${path.module}/cloud-formation-templates/example-two-node-cluster.yaml"
-  template_url         = "https://${var.emr_studio_bucket}.s3.amazonaws.com/service-catalog-templates/example-two-node-cluster.yaml"
-  s3_bucket           = var.emr_studio_bucket
+  s3_location_cloud_formation_templates = var.s3_location_cloud_formation_templates
   
   tags = {
     Environment = "production"

@@ -25,7 +25,7 @@ variable "product_name" {
 variable "product_owner" {
   description = "Owner of the Service Catalog product"
   type        = string
-  default     = "EMR Team"
+  default     = "Data Team"
 }
 
 variable "template_version_name" {
@@ -40,10 +40,6 @@ variable "template_description" {
   default     = "Example two-node EMR cluster with Spark, Livy, JupyterEnterpriseGateway, and Hive"
 }
 
-variable "template_url" {
-  description = "S3 URL of the CloudFormation template"
-  type        = string
-}
 
 variable "template_file_path" {
   description = "Local path to the CloudFormation template file"
@@ -56,7 +52,7 @@ variable "template_file_name" {
   default     = "example-two-node-cluster.yaml"
 }
 
-variable "s3_bucket" {
+variable "s3_location_cloud_formation_templates" {
   description = "S3 bucket to store the CloudFormation template"
   type        = string
 }

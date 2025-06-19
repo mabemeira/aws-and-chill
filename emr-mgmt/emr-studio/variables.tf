@@ -49,7 +49,7 @@ variable "subnet_ids" {
   }
 }
 
-variable "default_s3_location" {
+variable "s3_location_emr_studio_notebooks" {
   description = "Default S3 location for EMR Studio"
   type        = string
 }
@@ -71,4 +71,9 @@ variable "service_catalog_product_name" {
   description = "Name of the Service Catalog product"
   type        = string
   default     = "EMR Two Node Cluster"
+}
+
+variable "s3_location_cloud_formation_templates" {
+  description = "S3 bucket to store the CloudFormation template"
+  type        = string
 }

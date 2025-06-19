@@ -20,5 +20,5 @@ output "product_arn" {
 
 output "template_s3_url" {
   description = "S3 URL of the uploaded CloudFormation template"
-  value       = "https://${var.s3_bucket}.s3.amazonaws.com/${aws_s3_object.cloudformation_template.key}"
+  value       = "https://${aws_s3_object.cloudformation_template.bucket}.s3.amazonaws.com/${aws_s3_object.cloudformation_template.key}"
 }
