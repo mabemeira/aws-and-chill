@@ -1,4 +1,4 @@
-awsTemplateFormatVersion: 2010-09-09
+AWSTemplateFormatVersion: 2010-09-09
 
 Parameters:
   ClusterName:
@@ -16,6 +16,9 @@ Parameters:
     AllowedValues:
     - "m5.xlarge"
     - "m5.2xlarge"
+  SubnetId:
+    Type: "String"
+    Description: "Subnet ID for EMR cluster"
 
 Resources:
   EmrCluster:
@@ -36,7 +39,7 @@ Resources:
         Fn::Sub: 's3://aws-logs-${AWS::AccountId}-${AWS::Region}/elasticmapreduce/'
       Instances:
         TerminationProtected: false
-        Ec2SubnetId: 'subnet-ab12345c'
+        Ec2SubnetId: !Ref SubnetId
         MasterInstanceGroup:
           InstanceCount: 1
           InstanceType: !Ref ClusterInstanceType
