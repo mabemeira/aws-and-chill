@@ -1,6 +1,6 @@
 # Amazon EMR Studio IAM Configuration
 
-This Terraform module sets up the necessary resources for Amazon EMR Studio, creating different user access levels and a service role for EMR Studio operations.
+This Terraform module sets up the necessary resources for AWS Service Catalog integration to the EMR Studio module, enabling self-service EMR cluster provisioning through pre-approved CloudFormation templates.
 
 ## Overview
 
