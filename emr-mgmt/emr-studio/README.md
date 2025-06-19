@@ -338,11 +338,3 @@ The module provides the following outputs:
 ### Common Issues
 1. **Missing S3 Bucket**: Ensure the specified S3 bucket exists before deployment
 3. **VPC Configuration**: Verify that subnets and security groups are properly configured for EMR clusters
-
-# TODOS:
-- checar variaveis do service catalog
-- checar se fica disponível em um catalogo publico
-- tentar executar terraform apply
-- padrao main - outputs variables para demais modules
-- (ler) git based repositories
-- (ler) optimize spark
