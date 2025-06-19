@@ -40,7 +40,7 @@ variable "engine_security_group_id" {
   type        = string
 }
 
-variable "default_s3_location" {
+variable "s3_location_emr_studio_notebooks" {
   description = "Default S3 location for EMR Studio"
   type        = string
 }
@@ -61,7 +61,7 @@ resource "aws_emr_studio" "main" {
   service_role                = var.service_role_arn
   workspace_security_group_id = var.workspace_security_group_id
   engine_security_group_id    = var.engine_security_group_id
-  default_s3_location         = var.default_s3_location
+  default_s3_location         = var.s3_location_emr_studio_notebooks
 
 
   tags = merge(
@@ -69,7 +69,7 @@ resource "aws_emr_studio" "main" {
     {
       Name    = var.emr_studio_name
       Project = "aws-and-chill"
-      Team = "Data Analytics"
+      Team    = "Data Analytics"
     }
   )
 }
