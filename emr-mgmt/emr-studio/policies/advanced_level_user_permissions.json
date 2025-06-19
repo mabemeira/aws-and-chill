@@ -1,0 +1,159 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "AllowEMRActions",
+      "Action": [
+        "elasticmapreduce:*Editor*",
+        "elasticmapreduce:*Repository",
+        "elasticmapreduce:*Repository*",
+        "elasticmapreduce:DescribeCluster",
+        "elasticmapreduce:List*",
+        "elasticmapreduce:*PersistentAppUI*",
+        "elasticmapreduce:GetOnClusterAppUIPresignedURL",
+        "elasticmapreduce:RunJobFlow",
+        "elasticmapreduce:UpdateEditor",
+        "elasticmapreduce:*WorkspaceAccess*"
+      ],
+      "Resource": "*",
+      "Effect": "Allow"
+    },
+    {
+      "Sid": "AllowEMRContainers",
+      "Action": [
+        "emr-containers:Describe*",
+        "emr-containers:List*",
+        "emr-containers:GetManagedEndpointSessionCredentials"
+      ],
+      "Resource": "*",
+      "Effect": "Allow"
+    },
+    {
+      "Sid": "AllowSecretManagerListSecrets",
+      "Action": ["secretsmanager:ListSecrets"],
+      "Resource": "*",
+      "Effect": "Allow"
+    },
+    {
+      "Sid": "AllowSecretCreationWithEMRTagsAndEMRStudioPrefix",
+      "Effect": "Allow",
+      "Action": "secretsmanager:CreateSecret",
+      "Resource": "arn:aws:secretsmanager:*:*:secret:emr-studio-*",
+      "Condition": {
+        "StringEquals": {
+          "aws:RequestTag/for-use-with-amazon-emr-managed-policies": "true"
+        }
+      }
+    },
+    {
+      "Sid": "AllowAddingTagsOnSecretsWithEMRStudioPrefix",
+      "Effect": "Allow",
+      "Action": "secretsmanager:TagResource",
+      "Resource": "arn:aws:secretsmanager:*:*:secret:emr-studio-*"
+    },
+    {
+      "Sid": "AllowClusterTemplateRelatedIntermediateActions",
+      "Action": [
+        "servicecatalog:DescribeProduct",
+        "servicecatalog:DescribeProductView",
+        "servicecatalog:DescribeProvisioningParameters",
+        "servicecatalog:ProvisionProduct",
+        "servicecatalog:SearchProducts",
+        "servicecatalog:UpdateProvisionedProduct",
+        "servicecatalog:ListProvisioningArtifacts",
+        "servicecatalog:ListLaunchPaths",
+        "servicecatalog:DescribeRecord",
+        "cloudformation:DescribeStackResources"
+      ],
+      "Resource": "*",
+      "Effect": "Allow"
+    },
+    {
+      "Sid": "AllowPassingServiceRoleForWorkspaceCreation",
+      "Action": "iam:PassRole",
+      "Resource": [
+        "arn:aws:iam::*:role/${emr-studio-service-role}",
+        "arn:aws:iam::*:role/EMR_DefaultRole_V2",
+        "arn:aws:iam::*:role/EMR_EC2_DefaultRole"
+      ],
+      "Effect": "Allow"
+    },
+    {
+      "Sid": "AllowS3Permissions",
+      "Action": [
+        "s3:ListAllMyBuckets",
+        "s3:ListBucket",
+        "s3:GetBucketLocation",
+        "s3:GetObject"
+      ],
+      "Resource": [
+        "arn:aws:s3:::*",
+        "arn:aws:s3:::aws-logs-${aws-account-id}-${region}/elasticmapreduce/*"
+      ],
+      "Effect": "Allow"
+    },
+    {
+      "Sid": "AllowDescribeActions",
+      "Effect": "Allow",
+      "Action": [
+        "sagemaker:*Domain*",
+        "sagemaker:*UserProfile*",
+        "ec2:Describe*",
+        "iam:ListRoles"
+      ],
+      "Resource": "*"
+    },
+    {
+      "Sid": "AllowServerlessActions",
+      "Action": ["emr-serverless:*"],
+      "Resource": "*",
+      "Effect": "Allow"
+    },
+    {
+      "Sid": "AllowPassingRuntimeRoleForRunningServerlessJob",
+      "Action": "iam:PassRole",
+      "Resource": "arn:aws:iam::*:role/serverless-runtime-role",
+      "Effect": "Allow"
+    },
+    {
+      "Sid": "AllowCodeWhisperer",
+      "Effect": "Allow",
+      "Action": ["codewhisperer:GenerateRecommendations"],
+      "Resource": "*"
+    },
+    {
+      "Sid": "AllowAthenaSQL",
+      "Action": [
+        "athena:*",
+        "glue:*Database*",
+        "glue:*Table*",
+        "glue:*Partition*",
+        "kms:ListAliases",
+        "kms:ListKeys",
+        "kms:DescribeKey",
+        "lakeformation:GetDataAccess",
+        "s3:GetBucketLocation",
+        "s3:GetObject",
+        "s3:ListBucket",
+        "s3:ListBucketMultipart*",
+        "s3:*MultipartUpload*",
+        "s3:PutObject",
+        "s3:PutBucketPublicAccessBlock",
+        "s3:ListAllMyBuckets"
+      ],
+      "Resource": "*",
+      "Effect": "Allow"
+    },
+    {
+      "Sid": "AllowCreateStudioPresignedUrl",
+      "Effect": "Allow",
+      "Action": ["elasticmapreduce:CreateStudioPresignedUrl"],
+      "Resource": "arn:aws:elasticmapreduce:${region}:${aws-account-id}:studio/*",
+      "Condition": {
+        "StringEquals": {
+          "elasticmapreduce:ResourceTag/Team": "Data Analytics"
+        }
+      }
+    }
+  ]
+}

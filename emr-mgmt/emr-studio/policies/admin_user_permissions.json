@@ -1,0 +1,26 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Resource": "arn:aws:elasticmapreduce:${region}:${aws-account-id}:studio/*",
+      "Action": [
+        "elasticmapreduce:CreateStudio",
+        "elasticmapreduce:DescribeStudio",
+        "elasticmapreduce:DeleteStudio"
+      ]
+    },
+    {
+      "Effect": "Allow",
+      "Resource": "*",
+      "Action": ["elasticmapreduce:ListStudios"]
+    },
+    {
+      "Effect": "Allow",
+      "Resource": [
+        "arn:aws:iam::${aws-account-id}:role/${emr-studio-service-role}"
+      ],
+      "Action": "iam:PassRole"
+    }
+  ]
+}

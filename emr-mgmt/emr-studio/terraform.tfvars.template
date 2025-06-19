@@ -1,0 +1,5 @@
+emr_studio_bucket="your-bucket-name"
+vpc_id="vpc-12345"
+subnet_ids=["subnet-12345","subnet-67890"]
+s3_location_emr_studio_notebooks="s3://your-bucket-name/emr-mgmt/emr-studio/notebooks/"
+s3_location_cloud_formation_templates="s3://your-bucket-name/cloud-formation-templates/"
