@@ -54,16 +54,19 @@
     {
       "Sid": "AllowClusterTemplateRelatedIntermediateActions",
       "Action": [
-        "servicecatalog:DescribeProduct",
-        "servicecatalog:DescribeProductView",
-        "servicecatalog:DescribeProvisioningParameters",
+        "servicecatalog:Describe*",
+        "servicecatalog:List*",
+        "servicecatalog:Search*",
         "servicecatalog:ProvisionProduct",
-        "servicecatalog:SearchProducts",
         "servicecatalog:UpdateProvisionedProduct",
-        "servicecatalog:ListProvisioningArtifacts",
-        "servicecatalog:ListLaunchPaths",
-        "servicecatalog:DescribeRecord",
-        "cloudformation:DescribeStackResources"
+        "servicecatalog:TerminateProvisionedProduct",
+        "servicecatalog:ScanProvisionedProducts",
+        "cloudformation:CreateStack",
+        "cloudformation:UpdateStack",
+        "cloudformation:DeleteStack",
+        "cloudformation:Describe*",
+        "cloudformation:List*",
+        "cloudformation:Get*"
       ],
       "Resource": "*",
       "Effect": "Allow"
