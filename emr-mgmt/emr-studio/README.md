@@ -342,7 +342,6 @@ The module provides the following outputs:
 
 - **EMR Studio Service Role**: Name, ARN, and policy ARN
 - **IAM Users**: Details for all created users (admin, basic, intermediate, advanced)
-- ...
 
 ## Tags Applied:
 - `Name`: Studio name for identification
