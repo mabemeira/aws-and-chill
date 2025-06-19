@@ -75,6 +75,9 @@ emr-mgmt/emr-studio/
 └── policies/                  # JSON policy files
     ├── service_role_trust_policy.json
     ├── service_role_permissions.json
+    ├── emr_default_role_trust_policy.json
+    ├── emr_default_role_ec2_permissions.json
+    ├── emr_ec2_default_role_trust_policy.json
     ├── admin_user_permissions.json
     ├── basic_level_user_permissions.json
     ├── intermediate_level_user_permissions.json
@@ -207,6 +210,33 @@ terraform output
 - `policies/service_role_trust_policy.json`: Trust relationship with security conditions
 - `policies/service_role_permissions.json`: Service-specific permissions
 
+### EMR Default Roles
+
+**Purpose**: Standard roles required for EMR cluster operations, automatically created by this module.
+
+#### EMR_DefaultRole_V2 (EMR Service Role)
+**Key Permissions**:
+- Complete EMR cluster lifecycle management
+- EC2 instance and volume operations (RunInstances, CreateVolume, etc.)
+- Security group and networking management
+- IAM role passing for cluster operations
+
+**Security Features**:
+- Protected against confused deputy attacks with `aws:SourceAccount` and `aws:SourceArn` conditions
+- Scoped to specific account and region EMR resources
+
+**Files**:
+- `policies/emr_default_role_trust_policy.json`: Trust policy with confused deputy protection
+- `policies/emr_default_role_ec2_permissions.json`: Comprehensive EC2 and IAM permissions
+
+#### EMR_EC2_DefaultRole (EC2 Instance Profile)
+**Key Permissions**:
+- Standard EC2 operations for EMR cluster nodes
+- S3 access for EMR logs and data processing
+
+**Files**:
+- `policies/emr_ec2_default_role_trust_policy.json`: Trust policy for EC2 service
+
 ### User Access Levels
 
 #### Basic User
@@ -332,9 +362,14 @@ The EMR Studio resource depends on:
 ## Security Best Practices
 
 1. **Principle of Least Privilege**: Each user type has only the minimum permissions required
-2. **Confused Deputy Protection**: Service role includes `aws:SourceArn` and `aws:SourceAccount` conditions
+2. **Confused Deputy Protection**: 
+   - EMR service roles include `aws:SourceArn` and `aws:SourceAccount` conditions
+   - EMR Studio service role includes similar protections
+   - EC2 roles include `aws:SourceAccount` conditions
 3. **Resource-Based Access**: Policies are scoped to specific resources and accounts
-4. **Regular Review**: Periodically review and update permissions as requirements change
+4. **Service Catalog Access Control**: Principal associations ensure only authorized users can provision resources
+5. **Comprehensive Permissions**: EMR roles include all necessary EC2, IAM, and networking permissions for cluster operations
+6. **Regular Review**: Periodically review and update permissions as requirements change
 
 ## Outputs
 
@@ -365,6 +400,7 @@ The Service Catalog module provides self-service EMR cluster provisioning capabi
 - **Name**: "EMR Two Node Cluster" (configurable)
 - **Type**: CloudFormation Template
 - **Template**: Two-node EMR cluster with Spark, Livy, JupyterEnterpriseGateway, and Hive
+- **Access Control**: Principal associations automatically created for Advanced and Intermediate users
 
 #### CloudFormation Template
 
@@ -408,5 +444,26 @@ CloudFormation templates are automatically uploaded to S3 at the location specif
 ## Troubleshooting
 
 ### Common Issues
+
+#### Service Catalog Issues
+1. **Portfolio not visible**: Ensure the user is associated with the portfolio via principal associations
+2. **CloudFormation stack creation fails**: 
+   - Check that EMR default roles exist and have sufficient permissions
+   - Verify EC2 permissions for security group creation and instance management
+
+#### EMR Role Issues
+1. **"Insufficient EC2 permissions"**: EMR_DefaultRole_V2 needs comprehensive EC2 permissions including:
+   - `ec2:RunInstances`, `ec2:CreateSecurityGroup`, `ec2:CreateVolume`
+   - `iam:PassRole` for EMR roles
+2. **"Invalid InstanceProfile"**: Ensure EMR_EC2_DefaultRole instance profile exists
+3. **Trust policy issues**: Verify confused deputy protection doesn't block legitimate EMR operations
+
+#### General Issues
 1. **Missing S3 Bucket**: Ensure the specified S3 bucket exists before deployment
-3. **VPC Configuration**: Verify that subnets and security groups are properly configured for EMR clusters
+2. **VPC Configuration**: Verify that subnets and security groups are properly configured for EMR clusters
+3. **Parameter not requested**: CloudFormation templates require all non-default parameters to be specified
+
+#### Resolution Steps
+1. **Check CloudFormation Events**: Use AWS console or CLI to view detailed error messages
+2. **Verify IAM Permissions**: Ensure all roles have necessary permissions for their intended operations
+3. **Test Service Catalog Access**: Confirm users can see and launch products from portfolios
