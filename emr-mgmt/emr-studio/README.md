@@ -40,6 +40,7 @@ This module creates:
    - **Advanced**: Full cluster creation and configuration permissions
 3. **Networking Infrastructure**: Security groups and VPC validation for EMR Studio connectivity
 4. **EMR Studio Instance**: The main studio resource with IAM authentication
+5. **Service Catalog Integration**: Portfolio and products for self-service EMR cluster provisioning
 
 ### Module Architecture
 
@@ -51,16 +52,26 @@ emr-mgmt/emr-studio/
 ├── modules/
 │   ├── emr-service-role/      # EMR Studio service role
 │   │   ├── main.tf
+│   │   ├── variables.tf
 │   │   └── outputs.tf
 │   ├── iam-user/              # Reusable IAM user module
 │   │   ├── main.tf
+│   │   ├── variables.tf
 │   │   └── outputs.tf
 │   ├── networking/            # Security groups and VPC validation
 │   │   ├── main.tf
+│   │   ├── variables.tf
 │   │   └── outputs.tf
-│   └── emr-studio/            # EMR Studio resource
+│   ├── emr-studio/            # EMR Studio resource
+│   │   ├── main.tf
+│   │   ├── variables.tf
+│   │   └── outputs.tf
+│   └── service-catalog/       # Service Catalog for self-service provisioning
 │       ├── main.tf
+│       ├── variables.tf
 │       └── outputs.tf
+├── cloud-formation-templates/ # CloudFormation templates for Service Catalog
+│   └── example-two-node-cluster.yaml
 └── policies/                  # JSON policy files
     ├── service_role_trust_policy.json
     ├── service_role_permissions.json
@@ -78,6 +89,7 @@ The modules have the following dependency relationships:
 2. **iam-user** → Independent (creates users for each access level)
 3. **networking** → Independent (validates VPC and creates security groups)
 4. **emr-studio** → Depends on: emr-service-role, networking
+5. **service-catalog** → Independent (creates portfolio, products, and uploads CloudFormation templates)
 
 ### Resource Creation Flow
 
@@ -86,7 +98,9 @@ graph TD
     A[emr-service-role] --> D[emr-studio]
     B[networking] --> D
     C[iam-user × 4] 
+    SC[service-catalog]
     D --> E[EMR Studio Ready]
+    SC --> F[Self-Service Provisioning Ready]
     
     A1[IAM Role] --> A
     A2[IAM Policy] --> A
@@ -100,6 +114,10 @@ graph TD
     C2[Basic User] --> C
     C3[Intermediate User] --> C
     C4[Advanced User] --> C
+    
+    SC1[Service Catalog Portfolio] --> SC
+    SC2[Service Catalog Product] --> SC
+    SC3[CloudFormation Template Upload] --> SC
 ```
 
 ### Reusable Components
@@ -146,11 +164,15 @@ All resources follow a consistent naming pattern:
 Create a `terraform.tfvars` file with your specific values:
 
 ```hcl
-aws_region                 = "us-west-2"
-emr_studio_service_role   = "EMRStudio-Service-Role"
-emr_studio_bucket         = "your-emr-studio-bucket-name"
-virtual_cluster_id        = "*"  # or specific cluster ID
-emr_on_eks_execution_role = "*"  # or specific role name
+aws_region                            = "us-west-2"
+emr_studio_service_role              = "EMRStudio-Service-Role"
+emr_studio_bucket                    = "your-emr-studio-bucket-name"
+virtual_cluster_id                   = "*"  # or specific cluster ID
+emr_on_eks_execution_role            = "*"  # or specific role name
+s3_location_emr_studio_notebooks     = "s3://your-emr-studio-bucket/notebooks/"
+s3_location_cloud_formation_templates = "s3://your-bucket-name/cloud-formation-templates/"
+vpc_id                               = "vpc-12345678"
+subnet_ids                           = ["subnet-12345678", "subnet-87654321"]
 ```
 
 ### 2. Deploy Infrastructure
@@ -327,11 +349,62 @@ The module provides the following outputs:
 - `Project`: "aws-and-chill" for resource grouping
 - Additional tags can be merged via the `tags` variable
 
+## Service Catalog Integration
+
+### Overview
+
+The Service Catalog module provides self-service EMR cluster provisioning capabilities, allowing users to deploy pre-configured EMR clusters using approved CloudFormation templates.
+
+### Components
+
+#### Service Catalog Portfolio
+- **Name**: "EMR Cluster Templates" (configurable)
+- **Purpose**: Groups related EMR cluster products for organized access
+- **Provider**: "AWS and Chill Project"
+
+#### Service Catalog Product
+- **Name**: "EMR Two Node Cluster" (configurable)
+- **Type**: CloudFormation Template
+- **Template**: Two-node EMR cluster with Spark, Livy, JupyterEnterpriseGateway, and Hive
+
+#### CloudFormation Template
+
+**Location**: `cloud-formation-templates/example-two-node-cluster.yaml`
+
+**Template Features**:
+- **EMR Release**: Configurable (default: emr-6.2.0)
+- **Instance Type**: Configurable (default: m5.xlarge)
+- **Applications**: Spark, Livy, JupyterEnterpriseGateway, Hive
+- **Cluster Configuration**: 1 master + 1 core node
+- **Logging**: Automatic S3 logging to `s3://aws-logs-{account-id}-{region}/elasticmapreduce/`
+
+**Parameters**:
+- `ClusterName`: Name for the EMR cluster
+- `EmrRelease`: EMR version (emr-6.2.0 or emr-5.32.0)
+- `ClusterInstanceType`: EC2 instance type (m5.xlarge or m5.2xlarge)
+- `SubnetId`: VPC subnet for cluster deployment
+
+### Self-Service Workflow
+
+1. **User Access**: Users with intermediate/advanced permissions can access Service Catalog
+2. **Product Selection**: Choose "EMR Two Node Cluster" from the "EMR Cluster Templates" portfolio
+3. **Parameter Configuration**: Specify cluster name, EMR version, instance type, and subnet
+4. **Provisioning**: Service Catalog deploys the EMR cluster using the CloudFormation template
+5. **Management**: Users can manage the provisioned cluster through EMR Studio
+
+### Template Storage
+
+CloudFormation templates are automatically uploaded to S3 at the location specified by `s3_location_cloud_formation_templates` variable:
+- **Bucket**: Extracted from the S3 URL
+- **Key**: Combines the specified path with the template filename
+- **Template URL**: Generated automatically for Service Catalog product
+
 ## References
 
 - [Amazon EMR Studio Management Guide](https://docs.aws.amazon.com/emr/latest/ManagementGuide/emr-studio-configure.html)
 - [EMR Studio Admin Permissions](https://docs.aws.amazon.com/emr/latest/ManagementGuide/emr-studio-admin-permissions.html#emr-studio-admin-permissions-table)
 - [EMR Studio User Permissions](https://docs.aws.amazon.com/emr/latest/ManagementGuide/emr-studio-user-permissions.html)
+- [AWS Service Catalog User Guide](https://docs.aws.amazon.com/servicecatalog/latest/userguide/what-is_concepts.html)
 
 ## Troubleshooting
 
