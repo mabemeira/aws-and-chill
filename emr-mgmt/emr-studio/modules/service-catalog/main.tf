@@ -43,6 +43,18 @@ resource "aws_servicecatalog_product_portfolio_association" "emr_template_associ
   product_id   = aws_servicecatalog_product.emr_cluster_template.id
 }
 
+# Grant Advanced User Access to Portfolio
+resource "aws_servicecatalog_principal_portfolio_association" "advanced_user_access" {
+  portfolio_id  = aws_servicecatalog_portfolio.emr_templates.id
+  principal_arn = var.advanced_user_arn
+}
+
+# Grant Intermediate User Access to Portfolio  
+resource "aws_servicecatalog_principal_portfolio_association" "intermediate_user_access" {
+  portfolio_id  = aws_servicecatalog_portfolio.emr_templates.id
+  principal_arn = var.intermediate_user_arn
+}
+
 # Upload CloudFormation template to S3 for Service Catalog
 resource "aws_s3_object" "cloudformation_template" {
   bucket = split("/", replace(var.s3_location_cloud_formation_templates, "s3://", ""))[0]

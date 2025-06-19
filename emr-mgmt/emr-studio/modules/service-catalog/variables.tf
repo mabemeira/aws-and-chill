@@ -62,3 +62,13 @@ variable "tags" {
   type        = map(string)
   default     = {}
 }
+
+variable "advanced_user_arn" {
+  description = "ARN of the advanced user to grant portfolio access"
+  type        = string
+}
+
+variable "intermediate_user_arn" {
+  description = "ARN of the intermediate user to grant portfolio access"
+  type        = string
+}
